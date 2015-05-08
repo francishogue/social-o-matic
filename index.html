@@ -20,9 +20,9 @@
 	<script>
 		// Initialize FB SDK
 		socialOmatic.facebook.init({
-			lang: 'en',
+			lang: 'en', // Make this part dynamic by reading your document language
 			fbInitOptions: {
-				appId: '379621572239384',
+				appId: '379621572239384', // Make this part dynamic by using data-attr on your <body>
 				status: false,
 				xfbml: true,
 				version: 'v2.3'
