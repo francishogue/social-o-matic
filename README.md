@@ -3,6 +3,7 @@ Social-O-matic
 
 Quick and easy way to add social plugins to your website (Facebook JS API, Twitter API & YouTube API).
 
+## Usage ##
 ```JavaScript
 // Initialize FB SDK
 socialOmatic.facebook.init({
@@ -42,3 +43,9 @@ socialOmatic.twitter.init({
 	}
 });
 ```
+
+## TODO ##
+- add more APIs
+- add Gulp
+- ?
+
