@@ -1,121 +1,179 @@
-/* ===========================================================================
-Social plugins (FB like button, Twitter tweet button and Google +1)
-============================================================================== */
-var socialPlugins = (function($, window, undefined) {
-    var lang = null;
+/* global socialOmatic, console, window, document */
 
-    var initFB = function() {
-        // https://developers.facebook.com/docs/reference/javascript/FB.init/
-        (function(d, s, id) {
-            var js, fjs = d.getElementsByTagName(s)[0];
-            if (d.getElementById(id)) return;
-            js = d.createElement(s); js.id = id;
-            js.src = "//connect.facebook.net/"+lang+"/all.js";
-            fjs.parentNode.insertBefore(js, fjs);
-        }(document, 'script', 'facebook-jssdk'));
+(function(window, document, undefined) {
 
-        window.fbAsyncInit = function() {
-            FB.init({
-                appId      : $('body').data('fb-appid'),
-                status     : true,
-                cookie     : true,
-                xfbml      : true
-            });
+	'use strict';
 
-            FB.Event.subscribe('edge.create', function(href, widget){
-                _gaq.push(['_trackSocial', 'Facebook', 'Like', href]);
-            });
-        }
-    }
+	var socialOmatic = window.socialOmatic = window.socialOmatic || {};
 
-    var initGoogle = function() {
-        // https://developers.google.com/+/web/+1button/#async-load
-        window.___gcfg = {
-            lang: lang,
-            parsetags: 'onload'
-        };
-        (function() {
-            var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
-            po.src = 'https://apis.google.com/js/plusone.js?onload=test';
-            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
-        })();
-    }
+	socialOmatic.youtube = (function() {
 
-    var initTwitter = function() {
-        // https://dev.twitter.com/docs/intents/events
-        window.twttr = (function (d,s,id) {
-            var t, js, fjs = d.getElementsByTagName(s)[0];
-            if (d.getElementById(id)) return; js=d.createElement(s); js.id=id;
-            js.src="//platform.twitter.com/widgets.js"; fjs.parentNode.insertBefore(js, fjs);
-            return window.twttr || (t = { _e: [], ready: function(f){ t._e.push(f) } });
-        }(document, "script", "twitter-wjs"));
+		var
+			opts,
+			defaults = {
+				hasLoaded: function() {}
+			};
 
-        twttr.ready(function(twttr) {
-            function trackSocialIntent(intent_event) {
-                if (!intent_event) { return; }
-                _gaq.push(['_trackSocial', 'twitter', intent_event.type]);
-            }
-            twttr.events.bind('click', trackSocialIntent);
-            twttr.events.bind('tweet', trackSocialIntent);
-            twttr.events.bind('retweet', trackSocialIntent);
-            twttr.events.bind('favorite', trackSocialIntent);
-            twttr.events.bind('follow', trackSocialIntent);
-        });
-    }
+		/**
+		 * Loads YouTube JS SDK
+		 * @param {Object} options for the SDK
+		 */
+		var init = function(options) {
 
-    // Render specific FB widgets
-    var renderFB = function(id) {
-        // id = ID of the container (string)
-        if(id !== 'undefined') {
-            FB.XFBML.parse(document.getElementById(id));
-        }else {
-            FB.XFBML.parse();
-        }
-    }
+			opts = extend({}, defaults, options);
 
-    // Render all Twitter widgets on the page
-    var renderTwitter = function() {
-        twttr.widgets.load();
-    }
+			var tag = document.createElement('script');
+			tag.src = "https://www.youtube.com/iframe_api";
+			var firstScriptTag = document.getElementsByTagName('script')[0];
+			firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-    // Render specific Google +1 widget
-    var renderPlusone = function(id) {
-        // id = ID of the container (string)
-        // https://developers.google.com/+/web/+1button/#jsapi
-        $el = $('#'+id);
-        container = id;
-        parameters = {
-            'href': $el.data('href'),
-            'size': $el.data('size'),
-            'annotation': $el.data('annotation'),
-            'callback': plusoneCallback
-        }
-        gapi.plusone.render(container, parameters);
-    }
+			if(window.YT) {
+				youtubeReady();
+			} else {
+				window.onYouTubeIframeAPIReady = youtubeReady;
+			}
+		};
 
-    var plusoneCallback = function(json) {
-        //console.log(json);
-        _gaq.push(['_trackSocial', 'Google', 'PlusOne', json.href, json.state]);
-    }
+		var youtubeReady = function() {
+			if(opts.hasLoaded && typeof(opts.hasLoaded) === 'function') {
+				opts.hasLoaded();
+			}
+		};
 
-    $(function() {
-        // TODO: only initialize those when needed!
-        if($('html').attr('lang') === 'fr') {
-            lang = 'fr_CA';
-        }else {
-            lang = 'en_US';
-        }
+		return {
+			init: init
+		};
+	})();
 
-        if(!$('body').hasClass('front')) {
-            initFB();
-            initTwitter();
-            initGoogle();
-        }
-    });
 
-    return {
-        renderFB: renderFB,
-        renderPlusone: renderPlusone,
-        renderTwitter: renderTwitter
-    }
-}(jQuery, window));
+	socialOmatic.facebook = (function() {
+
+		var
+			opts,
+			defaults = {
+				lang: 'en',
+				fbInitOptions: {
+					appId: '379621572239384',
+					status: false,
+					xfbml: true,
+					version: 'v2.3'
+				},
+				hasLoaded: function() {}
+			};
+
+		/**
+		 * Loads Facebook JS SDK
+		 * @param {Object} options for the SDK
+		 */
+		var init = function(options) {
+
+			// console.log(options);
+
+			if(typeof options === 'undefined') {
+				console.error('socialOmatic.facebook.init requires an options object parameter');
+			}
+
+			opts = extend({}, defaults, options);
+
+			// console.log(opts);
+
+			// https://developers.facebook.com/docs/reference/javascript/FB.init/
+			(function(d, s, id) {
+				var js, fjs = d.getElementsByTagName(s)[0];
+				if (d.getElementById(id)) return;
+				js = d.createElement(s); js.id = id;
+				js.src = "//connect.facebook.net/"+opts.lang+"/all.js";
+				fjs.parentNode.insertBefore(js, fjs);
+			}(document, 'script', 'facebook-jssdk'));
+
+			if(window.FB) {
+				facebookReady();
+			} else {
+				window.fbAsyncInit = facebookReady;
+			}
+		};
+
+		var facebookReady = function() {
+			window.FB.init(opts.fbInitOptions);
+
+			if(opts.hasLoaded && typeof(opts.hasLoaded) === 'function') {
+				opts.hasLoaded();
+			}
+		};
+
+		return {
+			init: init
+		};
+	})();
+
+
+	socialOmatic.twitter = (function() {
+
+		var
+			opts,
+			defaults = {
+				hasLoaded: function() {}
+			};
+
+		/**
+		 * Loads Twitter JS SDK
+		 * @param {Object} options for the SDK
+		 */
+		var init = function(options) {
+
+			opts = extend({}, defaults, options);
+
+			window.twttr = (function(d, s, id) {
+				var js, fjs = d.getElementsByTagName(s)[0],
+				  t = window.twttr || {};
+				if (d.getElementById(id)) return t;
+				js = d.createElement(s);
+				js.id = id;
+				js.src = "https://platform.twitter.com/widgets.js";
+				fjs.parentNode.insertBefore(js, fjs);
+
+				t._e = [];
+				t.ready = function(f) {
+				  t._e.push(f);
+				};
+
+				return t;
+			}(document, "script", "twitter-wjs"));
+
+			window.twttr.ready(function (twttr) {
+				twitterReady(twttr);
+			});
+
+		};
+
+		var twitterReady = function(twttr) {
+			// console.log('twttr', twttr);
+			if(opts.hasLoaded && typeof(opts.hasLoaded) === 'function') {
+				opts.hasLoaded(twttr);
+			}
+		};
+
+		return {
+			init: init
+		};
+	})();
+
+
+	// Extend helper
+	var extend = function(out) {
+		out = out || {};
+
+		for (var i = 1; i < arguments.length; i++) {
+			if (!arguments[i])
+				continue;
+
+			for (var key in arguments[i]) {
+				if (arguments[i].hasOwnProperty(key))
+					out[key] = arguments[i][key];
+			}
+		}
+
+		return out;
+	};
+
+})(window, document);

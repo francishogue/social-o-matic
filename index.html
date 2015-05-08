@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Social-O-matic</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+
+	<main role="main">
+		<h1>Social-O-matic</h1>
+		<div id="fb-api">Facebook API not loaded.</div>
+		<div id="tw-api">Twitter API not loaded.</div>
+		<div id="yt-api">YouTube API not loaded.</div>
+	</main>
+
+	<script src="social.js"></script>
+	<script>
+		// Initialize FB SDK
+		socialOmatic.facebook.init({
+			lang: 'en',
+			fbInitOptions: {
+				appId: '379621572239384',
+				status: false,
+				xfbml: true,
+				version: 'v2.3'
+			},
+			hasLoaded: function() {
+				console.log('Facebook JS SDK ready!');
+				document.getElementById('fb-api').textContent = 'Facebook JS SDK ready!';
+
+				// You can now start using it safely (binding events, using methods, etc).
+			}
+		});
+
+		// Initialize YouTube SDK
+		socialOmatic.youtube.init({
+			hasLoaded: function() {
+				console.log('YouTube JS API ready!');
+				document.getElementById('yt-api').textContent = 'YouTube JS API ready!';
+
+				// You can now start using it safely (binding events, using methods, etc).
+			}
+		});
+
+
+		// Initialize Twitter SDK
+		socialOmatic.twitter.init({
+			hasLoaded: function() {
+				console.log('Twitter JS API ready!');
+				document.getElementById('tw-api').textContent = 'Twitter JS API ready!';
+
+				// You can now start using it safely (binding events, using methods, etc).
+			}
+		});
+	</script>
+
+</body>
+</html>
