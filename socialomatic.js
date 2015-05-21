@@ -51,7 +51,7 @@
         var
         opts,
             defaults = {
-                lang: 'en',
+                lang: 'en_US', // fr_CA
                 fbInitOptions: {
                     appId: '379621572239384',
                     status: false,
