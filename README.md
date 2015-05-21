@@ -7,7 +7,7 @@ Quick and easy way to add social plugins to your website (Facebook JS API, Twitt
 ```JavaScript
 // Initialize FB SDK
 socialOmatic.facebook.init({
-	lang: 'en', // Make this part dynamic by reading your document language
+	lang: 'en_US', // Make this part dynamic by reading your document language (fr_CA)
 	fbInitOptions: {
 		appId: '379621572239384', // Make this part dynamic by using data-attr on your <body>
 		status: false,
